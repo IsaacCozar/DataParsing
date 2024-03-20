@@ -1,0 +1,54 @@
+import json
+import csv
+import xml.etree.ElementTree as ET
+import sys
+
+def read_file(file_name):
+    with open(file_name, 'r') as file:
+        return file.read()
+
+def convert_to_json(data, output_file):
+    parsed_data = json.loads(data)
+    with open(output_file, 'w') as file:
+        json.dump(parsed_data, file, indent=4)
+
+def convert_to_csv(data, output_file):
+    rows = [row.split(',') for row in data.split('\n')]
+    with open(output_file, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
+
+def convert_to_xml(data, output_file):
+    root = ET.Element('data')
+    lines = data.split('\n')
+    for line in lines:
+        item = ET.SubElement(root, 'item')
+        item.text = line
+    tree = ET.ElementTree(root)
+    tree.write(output_file)
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python script.py input_file_name")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    file_data = read_file(input_file)
+
+    format_choice = input("Enter 'j' for JSON, 'c' for CSV, or 'x' for XML: ")
+    if format_choice not in ['j', 'c', 'x']:
+        print("Invalid input. Exiting.")
+        sys.exit(1)
+
+    output_file = input_file.split('.')[0]  # Remove extension
+    if format_choice == 'j':
+        output_file += '.json'
+        convert_to_json(file_data, output_file)
+    elif format_choice == 'c':
+        output_file += '.csv'
+        convert_to_csv(file_data, output_file)
+    elif format_choice == 'x':
+        output_file += '.xml'
+        convert_to_xml(file_data, output_file)
+
+    print(f"File converted and saved as {output_file} in the current directory.")
